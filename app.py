@@ -677,6 +677,107 @@ def render_api_tab():
         st.rerun()
 
 
+def render_youtube_test_tab():
+    st.header("YouTube Upload Test")
+    st.caption("Test upload any video file to Dreamland Narrations")
+
+    # Check auth status
+    from src.youtube_uploader import YouTubeUploader, TOKEN_PATH
+
+    if not TOKEN_PATH.exists():
+        st.warning("Not authenticated yet. Run `python auth_youtube.py` from terminal first, or click below.")
+        if st.button("Authenticate with YouTube", type="primary", key="yt_auth_btn"):
+            u = YouTubeUploader()
+            if u.authenticate():
+                st.success("Authenticated!")
+                st.rerun()
+            else:
+                st.error("Auth failed")
+        return
+
+    st.success("YouTube authenticated")
+
+    # Show channel info
+    u = YouTubeUploader()
+    if u.authenticate():
+        try:
+            resp = u.youtube.channels().list(part="snippet,statistics", mine=True).execute()
+            if resp["items"]:
+                ch = resp["items"][0]
+                st.info(f"Channel: **{ch['snippet']['title']}** | Subscribers: {ch['statistics'].get('subscriberCount', '0')} | Videos: {ch['statistics'].get('videoCount', '0')}")
+        except Exception:
+            st.info("Channel: Dreamland Narrations (@DreamlandNarrations)")
+
+    st.divider()
+
+    # Video file selector
+    video_dir = Path("./output/full_videos")
+    video_files = list(video_dir.glob("*.mp4")) if video_dir.exists() else []
+
+    # Also check output root for any mp4
+    root_videos = list(Path("./output").glob("*.mp4"))
+    all_videos = video_files + root_videos
+
+    col1, col2 = st.columns([2, 1])
+
+    with col1:
+        if all_videos:
+            selected = st.selectbox(
+                "Select video to upload",
+                all_videos,
+                format_func=lambda x: f"{x.name} ({x.stat().st_size // 1024 // 1024}MB)",
+                key="test_vid_select",
+            )
+        else:
+            st.info("No videos found in output/")
+            uploaded = st.file_uploader("Or upload a video file", type=["mp4", "mkv", "avi", "webm"], key="test_vid_upload")
+            if uploaded:
+                save_path = video_dir / uploaded.name
+                with open(save_path, "wb") as f:
+                    f.write(uploaded.read())
+                st.success(f"Saved: {save_path}")
+                st.rerun()
+            selected = None
+
+    with col2:
+        privacy = st.selectbox("Privacy", ["private", "unlisted", "public"], key="test_privacy")
+
+    if selected or (not all_videos and 'test_vid_upload' not in st.session_state):
+        pass
+
+    # Metadata
+    st.subheader("Metadata")
+    title = st.text_input("Title", value="Bedtime Story for Kids - Dreamland Narrations", key="test_title")
+    description = st.text_area("Description", value="A magical bedtime story for kids. Subscribe to Dreamland Narrations for more!\n\n#bedtimestory #kidsstory #dreamlandnarrations", height=120, key="test_desc")
+    tags = st.text_input("Tags (comma separated)", value="bedtime story, kids story, children story, dreamland narrations, fairy tale, sleep story", key="test_tags")
+
+    st.divider()
+
+    if st.button("Upload to YouTube", type="primary", key="test_upload_btn"):
+        video_path = str(selected) if selected else None
+        if not video_path:
+            st.error("Select or upload a video first")
+            return
+
+        with st.spinner("Uploading..."):
+            u = YouTubeUploader()
+            result = u.upload_video(
+                video_path=video_path,
+                title=title,
+                description=description,
+                tags=[t.strip() for t in tags.split(",") if t.strip()],
+                privacy_status=privacy,
+                made_for_kids=True,
+            )
+
+            if result:
+                st.success("Uploaded!")
+                st.markdown(f"**[{result['title']}]({result['url']})**")
+                st.caption(f"Video ID: {result['video_id']}")
+            else:
+                st.error("Upload failed. Check logs.")
+
+
 def main():
     st.title("Bedtime Stories Automator")
     sidebar()
@@ -684,8 +785,8 @@ def main():
     if "active_tab" not in st.session_state:
         st.session_state["active_tab"] = "Create Video"
 
-    tab_names = ["Create Video", "API Status", "Topics Queue"]
-    tab1, tab2, tab3 = st.tabs(tab_names)
+    tab_names = ["Create Video", "YouTube Test", "API Status", "Topics Queue"]
+    tab1, tab2, tab3, tab4 = st.tabs(tab_names)
 
     with tab1:
         render_stepper()
@@ -717,8 +818,10 @@ def main():
             render_step_done()
 
     with tab2:
-        render_api_tab()
+        render_youtube_test_tab()
     with tab3:
+        render_api_tab()
+    with tab4:
         render_topics_tab()
 
 

@@ -5,12 +5,17 @@ Channel: Dreamland Narrations (@DreamlandNarrations)
 """
 
 import os
+import sys
 import json
 import time
-import pickle
+import asyncio
 from pathlib import Path
 from typing import Optional, Dict, Any, List
 from loguru import logger
+
+# Fix Windows event loop for OAuth
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
