@@ -19,13 +19,14 @@ from src.image_generator import ImageGenerator
 from src.voiceover_generator import VoiceoverGenerator
 from src.video_assembler import VideoAssembler
 from src.shorts_creator import ShortsCreator
+from src.youtube_uploader import YouTubeUploader
 
 for d in ["output/images", "output/audio", "output/full_videos", "output/shorts", "output/scripts"]:
     Path(d).mkdir(parents=True, exist_ok=True)
 
 st.set_page_config(page_title="Bedtime Stories Automator", page_icon=":crescent_moon:", layout="wide")
 
-STEPS = ["Configure", "Script", "Images", "Voiceover", "Video", "Done"]
+STEPS = ["Configure", "Script", "Images", "Voiceover", "Video", "YouTube", "Done"]
 
 def init_session():
     defaults = {
@@ -39,6 +40,8 @@ def init_session():
         "running": False,
         "completed_steps": [],
         "topic_from_queue": None,
+        "youtube_result": None,
+        "upload_privacy": "private",
     }
     for k, v in defaults.items():
         if k not in st.session_state:
@@ -49,7 +52,8 @@ init_session()
 
 def reset_all():
     for k in ["script", "image_paths", "audio_paths", "video_path", "short_paths",
-               "current_step", "completed_steps", "running", "topic_from_queue"]:
+               "current_step", "completed_steps", "running", "topic_from_queue",
+               "youtube_result"]:
         if k == "current_step":
             st.session_state[k] = 0
         elif k == "completed_steps":
@@ -106,7 +110,7 @@ def run_auto_pipeline(topic, age_group, duration, create_shorts, custom_prompt=N
 
     # Step 1: Script
     log("Generating script...")
-    progress_bar.progress(5, text="Step 1/5: Generating script...")
+    progress_bar.progress(3, text="Step 1/6: Generating script...")
 
     sg = ScriptGenerator()
     num_segments = max(10, duration * 2)
@@ -119,35 +123,35 @@ def run_auto_pipeline(topic, age_group, duration, create_shorts, custom_prompt=N
         return
     st.session_state["script"] = script
     st.session_state["completed_steps"].append(1)
-    progress_bar.progress(20, text="Step 1/5: Script generated!")
+    progress_bar.progress(15, text="Step 1/6: Script generated!")
     log(f"Script ready: {len(script.get('segments', []))} segments")
 
     # Step 2: Images
     log("Generating images...")
-    progress_bar.progress(25, text="Step 2/5: Generating images...")
+    progress_bar.progress(18, text="Step 2/6: Generating images...")
 
     ig = ImageGenerator()
     prefix = "story_%d" % int(time.time())
     paths = ig.generate_images(script["segments"], output_prefix=prefix)
     st.session_state["image_paths"] = paths
     st.session_state["completed_steps"].append(2)
-    progress_bar.progress(60, text="Step 2/5: Images generated!")
+    progress_bar.progress(50, text="Step 2/6: Images generated!")
     log(f"Generated {len(paths)} images")
 
     # Step 3: Voiceover
     log("Generating voiceover...")
-    progress_bar.progress(62, text="Step 3/5: Generating voiceover...")
+    progress_bar.progress(52, text="Step 3/6: Generating voiceover...")
 
     vg = VoiceoverGenerator()
     audio_paths = vg.generate_voiceover(script["segments"], output_prefix=prefix)
     st.session_state["audio_paths"] = audio_paths
     st.session_state["completed_steps"].append(3)
-    progress_bar.progress(80, text="Step 3/5: Voiceover generated!")
+    progress_bar.progress(70, text="Step 3/6: Voiceover generated!")
     log(f"Generated {len(audio_paths)} audio segments")
 
     # Step 4: Video Assembly
     log("Assembling video...")
-    progress_bar.progress(82, text="Step 4/5: Assembling video...")
+    progress_bar.progress(72, text="Step 4/6: Assembling video...")
 
     va = VideoAssembler()
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -166,24 +170,52 @@ def run_auto_pipeline(topic, age_group, duration, create_shorts, custom_prompt=N
         sc = ShortsCreator()
         short_paths = sc.create_shorts(video_path, script, output_prefix="short_%s" % timestamp)
 
-    progress_bar.progress(95, text="Step 5/5: Finalizing...")
-    log("Done!")
-
-    if video_path:
-        st.session_state["video_path"] = video_path
-        st.session_state["short_paths"] = short_paths
-        usage = UsageTracker()
-        usage.record_video_created(len(short_paths))
-        st.session_state["completed_steps"].extend([4, 5])
-        progress_bar.progress(100, text="Complete!")
-        st.session_state["current_step"] = 5
-        st.session_state["running"] = False
-        st.success("Video created successfully!")
-        time.sleep(0.5)
-        st.rerun()
-    else:
+    if not video_path:
         st.error("Video assembly failed")
         st.session_state["running"] = False
+        return
+
+    st.session_state["video_path"] = video_path
+    st.session_state["short_paths"] = short_paths
+    usage = UsageTracker()
+    usage.record_video_created(len(short_paths))
+    st.session_state["completed_steps"].append(4)
+    progress_bar.progress(85, text="Step 4/6: Video assembled!")
+
+    # Step 5: YouTube Upload
+    log("Uploading to YouTube...")
+    progress_bar.progress(87, text="Step 5/6: Uploading to YouTube...")
+
+    uploader = YouTubeUploader()
+    metadata = uploader.build_metadata_from_script(
+        script, privacy=st.session_state.get("upload_privacy", "private")
+    )
+
+    yt_result = uploader.upload_video(
+        video_path=video_path,
+        title=metadata["title"],
+        description=metadata["description"],
+        tags=metadata["tags"],
+        privacy_status=metadata["privacy_status"],
+        made_for_kids=metadata["made_for_kids"],
+    )
+
+    if yt_result:
+        st.session_state["youtube_result"] = yt_result
+        st.session_state["completed_steps"].append(5)
+        progress_bar.progress(98, text="Step 5/6: Uploaded to YouTube!")
+        log(f"Uploaded: {yt_result['url']}")
+    else:
+        log("YouTube upload skipped (auth or quota issue)")
+
+    # Step 6: Done
+    st.session_state["completed_steps"].append(6)
+    progress_bar.progress(100, text="Complete!")
+    st.session_state["current_step"] = 6
+    st.session_state["running"] = False
+    log("All done!")
+    time.sleep(0.5)
+    st.rerun()
 
 
 def render_step_configure():
@@ -436,12 +468,86 @@ def render_step_video():
         st.session_state["current_step"] = 3
         st.rerun()
 
+    video_path = st.session_state.get("video_path")
+    if video_path and st.button("Next → Upload to YouTube", key="next_video"):
+        st.session_state["current_step"] = 5
+        st.rerun()
+
+
+def render_step_youtube():
+    video_path = st.session_state.get("video_path")
+    script = st.session_state.get("script")
+    youtube_result = st.session_state.get("youtube_result")
+
+    if not video_path:
+        st.info("Complete video assembly first")
+        return
+
+    st.subheader("Upload to YouTube")
+    st.caption("Channel: Dreamland Narrations (@DreamlandNarrations)")
+
+    if youtube_result:
+        st.success("Already uploaded!")
+        st.markdown(f"**[{youtube_result['title']}]({youtube_result['url']})**")
+        st.caption(f"Video ID: {youtube_result['video_id']}")
+        if youtube_result.get("thumbnail_set"):
+            st.info("Thumbnail set")
+    else:
+        if script:
+            uploader = YouTubeUploader()
+            metadata = uploader.build_metadata_from_script(script, privacy="private")
+
+            with st.expander("Preview Metadata", expanded=True):
+                st.text_input("Title", value=metadata["title"], key="yt_title", disabled=True)
+                st.text_area("Description", value=metadata["description"], height=150, key="yt_desc", disabled=True)
+                st.text_area("Tags", value=", ".join(metadata["tags"]), key="yt_tags", disabled=True)
+
+            privacy = st.selectbox("Privacy", ["private", "unlisted", "public"], key="yt_privacy")
+            st.session_state["upload_privacy"] = privacy
+
+            if st.button("Upload to YouTube", type="primary", key="yt_upload_btn"):
+                with st.spinner("Authenticating with YouTube..."):
+                    uploader = YouTubeUploader()
+                    metadata = uploader.build_metadata_from_script(script, privacy=privacy)
+
+                    with st.spinner("Uploading video..."):
+                        result = uploader.upload_video(
+                            video_path=video_path,
+                            title=metadata["title"],
+                            description=metadata["description"],
+                            tags=metadata["tags"],
+                            privacy_status=privacy,
+                            made_for_kids=True,
+                        )
+
+                        if result:
+                            st.session_state["youtube_result"] = result
+                            st.success("Uploaded!")
+                            st.rerun()
+                        else:
+                            st.error("Upload failed. Check logs.")
+
+    c1, c2 = st.columns(2)
+    with c1:
+        if st.button("← Back", key="back_yt"):
+            st.session_state["current_step"] = 4
+            st.rerun()
+    with c2:
+        if st.button("Done", key="done_yt"):
+            st.session_state["current_step"] = 6
+            st.rerun()
+
 
 def render_step_done():
     video_path = st.session_state.get("video_path")
     short_paths = st.session_state.get("short_paths", [])
+    youtube_result = st.session_state.get("youtube_result")
 
-    st.subheader("Results")
+    st.subheader("All Done!")
+
+    if youtube_result:
+        st.success(f"Uploaded to YouTube: [{youtube_result['title']}]({youtube_result['url']})")
+        st.caption(f"Video ID: {youtube_result['video_id']} | Privacy: {youtube_result.get('privacy', 'private')}")
 
     if video_path and os.path.exists(video_path):
         info = VideoAssembler().get_video_info(video_path)
@@ -589,6 +695,8 @@ def main():
         elif step == 4:
             render_step_video()
         elif step == 5:
+            render_step_youtube()
+        elif step == 6:
             render_step_done()
 
     with tab2:

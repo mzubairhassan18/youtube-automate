@@ -8,3 +8,5 @@ logs/
 .venv/
 .agents/
 .claude/
+config/client_secret.json
+token.json
