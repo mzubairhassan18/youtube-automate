@@ -1,0 +1,10 @@
+﻿__pycache__/
+*.pyc
+*.pyo
+output/
+logs/
+.env
+*.egg-info/
+.venv/
+.agents/
+.claude/

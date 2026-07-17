@@ -1,0 +1,55 @@
+# YouTube Automate - Python Dependencies
+# Bedtime Stories Channel Automation
+
+# ===========================================
+# AI & API
+# ===========================================
+google-generativeai>=0.5.0      # Gemini API
+requests>=2.31.0                # HTTP requests
+python-dotenv>=1.0.0            # Environment variables
+
+# ===========================================
+# TTS (Text-to-Speech)
+# ===========================================
+kokoro>=0.2.0                   # Local TTS (Apache 2.0)
+soundfile>=0.12.0               # Audio file handling
+numpy>=1.24.0                   # Audio processing
+
+# ===========================================
+# Video Processing
+# ===========================================
+moviepy>=2.0.0                  # Video editing
+Pillow>=10.0.0                  # Image processing
+ffmpeg-python>=0.2.0            # FFmpeg wrapper
+
+# ===========================================
+# YouTube Upload
+# ===========================================
+google-api-python-client>=2.100.0
+google-auth-httplib2>=0.2.0
+google-auth-oauthlib>=1.2.0
+
+# ===========================================
+# Web GUI
+# ===========================================
+streamlit>=1.30.0               # Web interface
+
+# ===========================================
+# Configuration & Logging
+# ===========================================
+pyyaml>=6.0.1                   # YAML config
+loguru>=0.7.0                   # Advanced logging
+rich>=13.0.0                    # Beautiful terminal output
+
+# ===========================================
+# Scheduling (Optional)
+# ===========================================
+schedule>=1.2.0                 # Task scheduling
+apscheduler>=3.10.0             # Advanced scheduling
+
+# ===========================================
+# Utilities
+# ===========================================
+aiohttp>=3.9.0                  # Async HTTP
+asyncio-throttle>=1.0.0         # Rate limiting
+tqdm>=4.66.0                    # Progress bars

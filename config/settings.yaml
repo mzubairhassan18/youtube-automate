@@ -1,0 +1,204 @@
+# YouTube Automate - Application Settings
+
+# ===========================================
+# VIDEO SETTINGS
+# ===========================================
+video:
+  resolution:
+    width: 1920
+    height: 1080
+  fps: 30
+  format: mp4
+  codec: libx264
+  audio_codec: aac
+  audio_bitrate: 192k
+  quality: "high"  # low, medium, high
+  
+  # Segment timing
+  segment_duration_min: 30  # seconds per image
+  segment_duration_max: 60  # seconds per image
+  transition_duration: 1.5  # crossfade seconds
+  
+  # Ken Burns effect
+  ken_burns:
+    enabled: true
+    zoom_start: 1.0
+    zoom_end: 1.15
+    pan_speed: 0.02
+
+# ===========================================
+# IMAGE SETTINGS
+# ===========================================
+images:
+  # Primary: Pollinations (free, unlimited)
+  primary_provider: pollinations
+  
+  # Fallback: SDXL API (if rate limited)
+  fallback_provider: sdxl
+  
+  resolution:
+    width: 1024
+    height: 576  # 16:9 aspect ratio
+  
+  style: "soft watercolor storybook illustration, warm golden lighting, dreamy atmosphere, gentle colors, children's book art style, no text, cinematic"
+  
+  # Negative prompt for image generation
+  negative_prompt: "text, words, letters, watermark, blurry, dark, scary, violent, realistic photo, 3d render"
+
+# ===========================================
+# VOICE SETTINGS (Edge TTS - Microsoft Neural TTS)
+# ===========================================
+voice:
+  # Male voices (bedtime stories)
+  primary_voice: male_calm  # en-US-GuyNeural
+  
+  # Alternative voices
+  voices:
+    male_calm: "Calm male (en-US-GuyNeural)"
+    male_deep: "Deep male (en-US-ChristopherNeural)"
+    male_warm: "Warm male (en-US-AndrewNeural)"
+    male_british: "British male (en-GB-RyanNeural)"
+    female_calm: "Calm female (en-US-AvaNeural)"
+  
+  # Speech settings for bedtime
+  rate: "-15%"   # Slightly slower
+  pitch: "-2Hz"  # Slightly deeper
+  volume: "+0%"
+  
+  # Audio format
+  format: wav
+  sample_rate: 44100
+
+# ===========================================
+# SCRIPT SETTINGS
+# ===========================================
+script:
+  # AI Model
+  model: gemini-2.5-flash
+  
+  # Generation settings
+  temperature: 0.8
+  top_p: 0.95
+  max_output_tokens: 8192
+  
+  # Story structure
+  min_segments: 10
+  max_segments: 20
+  words_per_minute: 130  # Reading speed for children
+
+# ===========================================
+# STORY CATEGORIES
+# ===========================================
+categories:
+  - islamic_history
+  - western_history
+  - motivational
+  - moral_stories
+  - animal_fables
+  - fairy_tales
+  - prophets_stories
+  - companion_stories
+  - science_discoveries
+  - courage_bravery
+
+# ===========================================
+# AGE GROUPS
+# ===========================================
+age_groups:
+  toddler:
+    min_age: 1
+    max_age: 3
+    duration_minutes: 3
+    vocabulary: "very simple"
+    sentence_length: "short"
+    
+  preschool:
+    min_age: 3
+    max_age: 5
+    duration_minutes: 5
+    vocabulary: "simple"
+    sentence_length: "medium"
+    
+  school_age:
+    min_age: 5
+    max_age: 8
+    duration_minutes: 8
+    vocabulary: "moderate"
+    sentence_length: "medium"
+    
+  preteen:
+    min_age: 8
+    max_age: 12
+    duration_minutes: 12
+    vocabulary: "advanced"
+    sentence_length: "long"
+
+# ===========================================
+# OUTPUT SETTINGS
+# ===========================================
+output:
+  base_dir: ./output
+  full_videos: ./output/full_videos
+  shorts: ./output/shorts
+  thumbnails: ./output/thumbnails
+  audio: ./output/audio
+  scripts: ./output/scripts
+  
+  # Shorts settings
+  shorts:
+    count: 3  # shorts per video
+    min_duration: 15
+    max_duration: 60
+    
+  # Thumbnail settings
+  thumbnail:
+    width: 1280
+    height: 720
+    format: jpg
+    quality: 95
+
+# ===========================================
+# YOUTUBE UPLOAD SETTINGS
+# ===========================================
+youtube:
+  # Upload settings
+  privacy_status: private  # private, unlisted, public
+  category_id: 22  # People & Blogs
+  embeddable: true
+  public_stats_viewable: true
+  
+  # Scheduling
+  schedule_enabled: false
+  upload_time: "19:00"  # 7 PM (bedtime)
+  timezone: "UTC"
+  
+  # Playlist
+  create_playlist: true
+  playlist_name: "Bedtime Stories"
+
+# ===========================================
+# API USAGE LIMITS
+# ===========================================
+limits:
+  gemini:
+    daily_limit: 1500
+    warning_threshold: 0.8  # 80%
+    
+  youtube:
+    daily_limit: 10000
+    warning_threshold: 0.8
+    
+  # Pollinations has no official limit
+  pollinations:
+    daily_limit: null
+    requests_per_minute: 20  # Conservative estimate
+
+# ===========================================
+# LOGGING
+# ===========================================
+logging:
+  level: INFO
+  file: ./logs/app.log
+  rotation: "10 MB"
+  retention: "30 days"
+  format: "{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}"

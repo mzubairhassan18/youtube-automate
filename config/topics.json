@@ -1,0 +1,509 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "last_updated": "2026-07-17",
+    "total_topics": 50
+  },
+  "topics": [
+    {
+      "id": 1,
+      "title": "The Story of Prophet Yusuf (Joseph) - A Lesson in Patience",
+      "category": "islamic_history",
+      "age_groups": ["preschool", "school_age", "preteen"],
+      "duration_minutes": 10,
+      "keywords": ["prophet yusuf", "patience", "dreams", "egypt", "forgiveness"],
+      "status": "pending",
+      "priority": 1
+    },
+    {
+      "id": 2,
+      "title": "The Kind King - A Tale of Justice and Mercy",
+      "category": "western_history",
+      "age_groups": ["preschool", "school_age"],
+      "duration_minutes": 8,
+      "keywords": ["king", "justice", "mercy", "kindness", "medieval"],
+      "status": "pending",
+      "priority": 2
+    },
+    {
+      "id": 3,
+      "title": "The Boy Who Saved the Village - A Story of Courage",
+      "category": "courage_bravery",
+      "age_groups": ["school_age", "preteen"],
+      "duration_minutes": 10,
+      "keywords": ["courage", "bravery", "village", "hero", "saving"],
+      "status": "pending",
+      "priority": 3
+    },
+    {
+      "id": 4,
+      "title": "The Wise Old Tree - A Nature Story",
+      "category": "moral_stories",
+      "age_groups": ["toddler", "preschool"],
+      "duration_minutes": 5,
+      "keywords": ["nature", "trees", "wisdom", "friends", "animals"],
+      "status": "pending",
+      "priority": 4
+    },
+    {
+      "id": 5,
+      "title": "Prophet Musa (Moses) and the Red Sea",
+      "category": "prophets_stories",
+      "age_groups": ["school_age", "preteen"],
+      "duration_minutes": 12,
+      "keywords": ["prophet musa", "red sea", "miracle", "faith", "egypt"],
+      "status": "pending",
+      "priority": 5
+    },
+    {
+      "id": 6,
+      "title": "The Little Fox Who Never Gave Up",
+      "category": "animal_fables",
+      "age_groups": ["toddler", "preschool"],
+      "duration_minutes": 4,
+      "keywords": ["fox", "perseverance", "forest", "friends", "never give up"],
+      "status": "pending",
+      "priority": 6
+    },
+    {
+      "id": 7,
+      "title": "The Secret Garden - A Story of Wonder",
+      "category": "fairy_tales",
+      "age_groups": ["preschool", "school_age"],
+      "duration_minutes": 8,
+      "keywords": ["garden", "magic", "flowers", "discovery", "wonder"],
+      "status": "pending",
+      "priority": 7
+    },
+    {
+      "id": 8,
+      "title": "The Companion Who Shared Everything - Bilal ibn Rabah",
+      "category": "companion_stories",
+      "age_groups": ["school_age", "preteen"],
+      "duration_minutes": 10,
+      "keywords": ["bilal", "companion", "patience", "adhan", "faith"],
+      "status": "pending",
+      "priority": 8
+    },
+    {
+      "id": 9,
+      "title": "The Inventor Who Changed the World - Story of Ibn Al-Haytham",
+      "category": "science_discoveries",
+      "age_groups": ["school_age", "preteen"],
+      "duration_minutes": 10,
+      "keywords": ["ibn al-haytham", "optics", "invention", "curiosity", "science"],
+      "status": "pending",
+      "priority": 9
+    },
+    {
+      "id": 10,
+      "title": "The Brave Little Rabbit - Overcoming Fear",
+      "category": "courage_bravery",
+      "age_groups": ["toddler", "preschool"],
+      "duration_minutes": 5,
+      "keywords": ["rabbit", "brave", "fear", "forest", "friends"],
+      "status": "pending",
+      "priority": 10
+    },
+    {
+      "id": 11,
+      "title": "The Story of Prophet Dawud (David) - The Shepherd King",
+      "category": "prophets_stories",
+      "age_groups": ["school_age", "preteen"],
+      "duration_minutes": 10,
+      "keywords": ["prophet dawud", "giant", "music", "psalms", "courage"],
+      "status": "pending",
+      "priority": 11
+    },
+    {
+      "id": 12,
+      "title": "The Little Red Hen - A Story About Hard Work",
+      "category": "moral_stories",
+      "age_groups": ["toddler", "preschool"],
+      "duration_minutes": 4,
+      "keywords": ["hen", "hard work", "helping", "bread", "friends"],
+      "status": "pending",
+      "priority": 12
+    },
+    {
+      "id": 13,
+      "title": "The Christmas Carol - A Tale of Redemption",
+      "category": "western_history",
+      "age_groups": ["preteen"],
+      "duration_minutes": 12,
+      "keywords": ["scrooge", "redemption", "christmas", "ghosts", "kindness"],
+      "status": "pending",
+      "priority": 13
+    },
+    {
+      "id": 14,
+      "title": "The Night Journey - Prophet Muhammad's (PBUH) Miraculous Story",
+      "category": "islamic_history",
+      "age_groups": ["school_age", "preteen"],
+      "duration_minutes": 12,
+      "keywords": ["isra", "miraj", "night journey", "jerusalem", "miracle"],
+      "status": "pending",
+      "priority": 14
+    },
+    {
+      "id": 15,
+      "title": "The Tortoise and the Hare - Patience Wins",
+      "category": "animal_fables",
+      "age_groups": ["toddler", "preschool"],
+      "duration_minutes": 4,
+      "keywords": ["tortoise", "hare", "patience", "race", "slow and steady"],
+      "status": "pending",
+      "priority": 15
+    },
+    {
+      "id": 16,
+      "title": "The Girl Who Found the Stars - A Story of Curiosity",
+      "category": "fairy_tales",
+      "age_groups": ["preschool", "school_age"],
+      "duration_minutes": 7,
+      "keywords": ["stars", "curiosity", "night sky", "discovery", "dreams"],
+      "status": "pending",
+      "priority": 16
+    },
+    {
+      "id": 17,
+      "title": "The Elephant Who Was Different - A Story About Diversity",
+      "category": "moral_stories",
+      "age_groups": ["preschool", "school_age"],
+      "duration_minutes": 6,
+      "keywords": ["elephant", "different", "diversity", "acceptance", "friends"],
+      "status": "pending",
+      "priority": 17
+    },
+    {
+      "id": 18,
+      "title": "The Story of Khadijah (RA) - The First Believer",
+      "category": "companion_stories",
+      "age_groups": ["school_age", "preteen"],
+      "duration_minutes": 10,
+      "keywords": ["khadijah", "first believer", "strength", "faith", "support"],
+      "status": "pending",
+      "priority": 18
+    },
+    {
+      "id": 19,
+      "title": "The Wise Owl Who Listened - A Story About Listening",
+      "category": "moral_stories",
+      "age_groups": ["toddler", "preschool"],
+      "duration_minutes": 5,
+      "keywords": ["owl", "listening", "wisdom", "forest", "friends"],
+      "status": "pending",
+      "priority": 19
+    },
+    {
+      "id": 20,
+      "title": "The Inventor's Dream - Story of Al-Jazari",
+      "category": "science_discoveries",
+      "age_groups": ["school_age", "preteen"],
+      "duration_minutes": 10,
+      "keywords": ["al-jazari", "inventions", "machines", "creativity", "engineering"],
+      "status": "pending",
+      "priority": 20
+    },
+    {
+      "id": 21,
+      "title": "The Little Boat That Could - A Story About Perseverance",
+      "category": "courage_bravery",
+      "age_groups": ["preschool", "school_age"],
+      "duration_minutes": 6,
+      "keywords": ["boat", "ocean", "perseverance", "courage", "adventure"],
+      "status": "pending",
+      "priority": 21
+    },
+    {
+      "id": 22,
+      "title": "The Story of Prophet Yunus (Jonah) - Inside the Whale",
+      "category": "prophets_stories",
+      "age_groups": ["school_age", "preteen"],
+      "duration_minutes": 8,
+      "keywords": ["prophet yunus", "whale", "patience", "repentance", "mercy"],
+      "status": "pending",
+      "priority": 22
+    },
+    {
+      "id": 23,
+      "title": "The Little Engine That Could - Believe in Yourself",
+      "category": "fairy_tales",
+      "age_groups": ["toddler", "preschool"],
+      "duration_minutes": 5,
+      "keywords": ["engine", "mountain", "believe", "determination", "positive"],
+      "status": "pending",
+      "priority": 23
+    },
+    {
+      "id": 24,
+      "title": "The Butterfly Who Was Afraid to Fly - Overcoming Fear",
+      "category": "moral_stories",
+      "age_groups": ["preschool", "school_age"],
+      "duration_minutes": 6,
+      "keywords": ["butterfly", "fear", "courage", "transformation", "growth"],
+      "status": "pending",
+      "priority": 24
+    },
+    {
+      "id": 25,
+      "title": "The Story of the Elephant Incident - A Lesson About Kindness",
+      "category": "islamic_history",
+      "age_groups": ["preteen"],
+      "duration_minutes": 10,
+      "keywords": ["elephant", "mecca", "kindness", "protection", "faith"],
+      "status": "pending",
+      "priority": 25
+    },
+    {
+      "id": 26,
+      "title": "The Ugly Duckling - Finding Your True Self",
+      "category": "fairy_tales",
+      "age_groups": ["preschool", "school_age"],
+      "duration_minutes": 7,
+      "keywords": ["duckling", "swan", "identity", "transformation", "beauty"],
+      "status": "pending",
+      "priority": 26
+    },
+    {
+      "id": 27,
+      "title": "The Generous Farmer - A Story About Sharing",
+      "category": "moral_stories",
+      "age_groups": ["toddler", "preschool"],
+      "duration_minutes": 5,
+      "keywords": ["farmer", "generous", "sharing", "harvest", "community"],
+      "status": "pending",
+      "priority": 27
+    },
+    {
+      "id": 28,
+      "title": "The Story of Prophet Ibrahim (Abraham) - The Friend of Allah",
+      "category": "prophets_stories",
+      "age_groups": ["school_age", "preteen"],
+      "duration_minutes": 12,
+      "keywords": ["prophet ibrahim", "friend of allah", "courage", "truth", "monotheism"],
+      "status": "pending",
+      "priority": 28
+    },
+    {
+      "id": 29,
+      "title": "The Robin Who Shared His Song - A Story About Talent",
+      "category": "animal_fables",
+      "age_groups": ["preschool", "school_age"],
+      "duration_minutes": 5,
+      "keywords": ["robin", "song", "talent", "sharing", "music"],
+      "status": "pending",
+      "priority": 29
+    },
+    {
+      "id": 30,
+      "title": "The Magic Paintbrush - A Story About Creativity",
+      "category": "fairy_tales",
+      "age_groups": ["school_age", "preteen"],
+      "duration_minutes": 8,
+      "keywords": ["paintbrush", "magic", "creativity", "art", "generosity"],
+      "status": "pending",
+      "priority": 30
+    },
+    {
+      "id": 31,
+      "title": "The Squirrel Who Saved for Winter - A Story About Planning",
+      "category": "animal_fables",
+      "age_groups": ["toddler", "preschool"],
+      "duration_minutes": 4,
+      "keywords": ["squirrel", "winter", "planning", "preparation", "food"],
+      "status": "pending",
+      "priority": 31
+    },
+    {
+      "id": 32,
+      "title": "The Story of the Cave - A Lesson About Brotherhood",
+      "category": "islamic_history",
+      "age_groups": ["preteen"],
+      "duration_minutes": 10,
+      "keywords": ["cave", "brotherhood", "sincerity", "trust in allah", "friendship"],
+      "status": "pending",
+      "priority": 32
+    },
+    {
+      "id": 33,
+      "title": "The Three Little Pigs - Building a Strong Foundation",
+      "category": "fairy_tales",
+      "age_groups": ["toddler", "preschool"],
+      "duration_minutes": 6,
+      "keywords": ["pigs", "house", "wolf", "hard work", "planning"],
+      "status": "pending",
+      "priority": 33
+    },
+    {
+      "id": 34,
+      "title": "The Bee Who Learned to Share - A Story About Community",
+      "category": "animal_fables",
+      "age_groups": ["preschool", "school_age"],
+      "duration_minutes": 5,
+      "keywords": ["bee", "honey", "sharing", "community", "friends"],
+      "status": "pending",
+      "priority": 34
+    },
+    {
+      "id": 35,
+      "title": "The Story of Zayd ibn Harithah - The Beloved Adopted Son",
+      "category": "companion_stories",
+      "age_groups": ["school_age", "preteen"],
+      "duration_minutes": 10,
+      "keywords": ["zayd", "adoption", "love", "family", "loyalty"],
+      "status": "pending",
+      "priority": 35
+    },
+    {
+      "id": 36,
+      "title": "The Lion and the Mouse - Small Acts of Kindness",
+      "category": "animal_fables",
+      "age_groups": ["toddler", "preschool"],
+      "duration_minutes": 4,
+      "keywords": ["lion", "mouse", "kindness", "gratitude", "helping"],
+      "status": "pending",
+      "priority": 36
+    },
+    {
+      "id": 37,
+      "title": "The Snow Queen - A Story of True Friendship",
+      "category": "fairy_tales",
+      "age_groups": ["school_age", "preteen"],
+      "duration_minutes": 12,
+      "keywords": ["snow queen", "friendship", "loyalty", "courage", "love"],
+      "status": "pending",
+      "priority": 37
+    },
+    {
+      "id": 38,
+      "title": "The Humble Carpenter - A Story About Work and Dignity",
+      "category": "moral_stories",
+      "age_groups": ["school_age"],
+      "duration_minutes": 7,
+      "keywords": ["carpenter", "humble", "work", "dignity", "honesty"],
+      "status": "pending",
+      "priority": 38
+    },
+    {
+      "id": 39,
+      "title": "The Story of the Well - A Lesson About Trust",
+      "category": "islamic_history",
+      "age_groups": ["preteen"],
+      "duration_minutes": 8,
+      "keywords": ["well", "trust", "patience", "providence", "faith"],
+      "status": "pending",
+      "priority": 39
+    },
+    {
+      "id": 40,
+      "title": "The Caterpillar's Journey - A Story About Growth",
+      "category": "moral_stories",
+      "age_groups": ["toddler", "preschool"],
+      "duration_minutes": 5,
+      "keywords": ["caterpillar", "butterfly", "growth", "change", "patience"],
+      "status": "pending",
+      "priority": 40
+    },
+    {
+      "id": 41,
+      "title": "The Story of Sulaiman (Solomon) - The Wise King",
+      "category": "prophets_stories",
+      "age_groups": ["school_age", "preteen"],
+      "duration_minutes": 10,
+      "keywords": ["prophet sulaiman", "wisdom", "kingdom", "animals", "judgment"],
+      "status": "pending",
+      "priority": 41
+    },
+    {
+      "id": 42,
+      "title": "The Brave Little Sparrow - Standing Up for Others",
+      "category": "courage_bravery",
+      "age_groups": ["preschool", "school_age"],
+      "duration_minutes": 5,
+      "keywords": ["sparrow", "brave", "standing up", "friends", "courage"],
+      "status": "pending",
+      "priority": 42
+    },
+    {
+      "id": 43,
+      "title": "The Magic Seeds - A Story About Patience",
+      "category": "fairy_tales",
+      "age_groups": ["preschool", "school_age"],
+      "duration_minutes": 6,
+      "keywords": ["seeds", "patience", "growth", "garden", "reward"],
+      "status": "pending",
+      "priority": 43
+    },
+    {
+      "id": 44,
+      "title": "The Story of Umar ibn Al-Khattab (RA) - The Just Caliph",
+      "category": "companion_stories",
+      "age_groups": ["school_age", "preteen"],
+      "duration_minutes": 10,
+      "keywords": ["umar", "justice", "caliph", "responsibility", "fairness"],
+      "status": "pending",
+      "priority": 44
+    },
+    {
+      "id": 45,
+      "title": "The Little Star Who Shone Bright - A Story About Self-Worth",
+      "category": "moral_stories",
+      "age_groups": ["toddler", "preschool"],
+      "duration_minutes": 4,
+      "keywords": ["star", "self-worth", "night sky", "shining", "unique"],
+      "status": "pending",
+      "priority": 45
+    },
+    {
+      "id": 46,
+      "title": "The Inventor Who Changed Medicine - Story of Ibn Sina",
+      "category": "science_discoveries",
+      "age_groups": ["school_age", "preteen"],
+      "duration_minutes": 10,
+      "keywords": ["ibn sina", "medicine", "healing", "knowledge", "helping"],
+      "status": "pending",
+      "priority": 46
+    },
+    {
+      "id": 47,
+      "title": "The Little Cloud's Adventure - A Story About Dreams",
+      "category": "fairy_tales",
+      "age_groups": ["toddler", "preschool"],
+      "duration_minutes": 5,
+      "keywords": ["cloud", "adventure", "dreams", "sky", "rain"],
+      "status": "pending",
+      "priority": 47
+    },
+    {
+      "id": 48,
+      "title": "The Honest Woodcutter - A Story About Truthfulness",
+      "category": "moral_stories",
+      "age_groups": ["preschool", "school_age"],
+      "duration_minutes": 5,
+      "keywords": ["woodcutter", "honest", "truth", "reward", "gold"],
+      "status": "pending",
+      "priority": 48
+    },
+    {
+      "id": 49,
+      "title": "The Story of the Three Companions - A Lesson About Gratitude",
+      "category": "islamic_history",
+      "age_groups": ["school_age", "preteen"],
+      "duration_minutes": 10,
+      "keywords": ["three companions", "gratitude", "patience", "trial", "blessings"],
+      "status": "pending",
+      "priority": 49
+    },
+    {
+      "id": 50,
+      "title": "The Panda Who Found His Way Home - A Story About Belonging",
+      "category": "animal_fables",
+      "age_groups": ["preschool", "school_age"],
+      "duration_minutes": 7,
+      "keywords": ["panda", "home", "belonging", "journey", "family"],
+      "status": "pending",
+      "priority": 50
+    }
+  ]
+}
