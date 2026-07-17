@@ -186,10 +186,14 @@ def run_auto_pipeline(topic, age_group, duration, create_shorts, custom_prompt=N
     auto_upload = st.session_state.get("auto_upload_yt", False)
 
     if auto_upload:
-        log("Uploading to YouTube...")
-        progress_bar.progress(87, text="Step 5/6: Uploading to YouTube...")
+        # Guard against duplicate upload
+        if st.session_state.get("youtube_result"):
+            log("Already uploaded to YouTube")
+        else:
+            log("Uploading to YouTube...")
+            progress_bar.progress(87, text="Step 5/6: Uploading to YouTube...")
 
-        uploader = YouTubeUploader()
+            uploader = YouTubeUploader()
         metadata = uploader.build_metadata_from_script(
             script, privacy=st.session_state.get("upload_privacy", "private")
         )
@@ -221,7 +225,6 @@ def run_auto_pipeline(topic, age_group, duration, create_shorts, custom_prompt=N
     st.session_state["running"] = False
     log("All done!")
     time.sleep(0.5)
-    st.rerun()
 
 
 def render_step_configure():
