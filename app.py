@@ -696,6 +696,21 @@ def render_youtube_test_tab():
 
     st.success("YouTube authenticated")
 
+    # Important: explain channel selection
+    st.info("""
+    **How to upload to Dreamland Narrations:**
+    1. Go to [YouTube Studio](https://studio.youtube.com)
+    2. Click your profile icon (top right)
+    3. Click **"Switch account"** → select **Dreamland Narrations**
+    4. Come back here and click **"Re-authenticate"** below
+    5. The OAuth will now tie to Dreamland Narrations
+    """)
+
+    if st.button("Re-authenticate (switch channel)", key="yt_reauth"):
+        from src.youtube_uploader import TOKEN_PATH
+        TOKEN_PATH.unlink(missing_ok=True)
+        st.rerun()
+
     u = YouTubeUploader()
     if not u.authenticate():
         st.error("Auth failed")
@@ -713,7 +728,6 @@ def render_youtube_test_tab():
             badge = " TARGET" if is_dreamland else ""
             st.write(f"{i+1}. **{ch_title}** (ID: `{ch_id}`, Subs: {ch_subs}){badge}")
 
-        # Channel selector
         channel_options = {ch["snippet"]["title"]: ch["id"] for ch in channels}
         selected_name = st.selectbox(
             "Upload to channel",
@@ -725,7 +739,6 @@ def render_youtube_test_tab():
         st.caption(f"Channel ID: `{selected_channel_id}`")
     else:
         st.warning("No channels found")
-        return
 
     st.divider()
 

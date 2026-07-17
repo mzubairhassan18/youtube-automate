@@ -96,13 +96,15 @@ class YouTubeUploader:
                     flow = InstalledAppFlow.from_client_secrets_file(
                         str(CLIENT_SECRET_PATH), SCOPES
                     )
-                    # Use run_local_server with open_browser=True
-                    # Suppress Windows socket cleanup errors
+                    # Force account/channel picker so user can select Dreamland Narrations
                     try:
-                        creds = flow.run_local_server(port=0, open_browser=True)
+                        creds = flow.run_local_server(
+                            port=0,
+                            open_browser=True,
+                            prompt="consent",
+                            access_type="offline",
+                        )
                     except OSError:
-                        # Windows socket cleanup error - OAuth likely succeeded
-                        # Check if token was saved
                         if TOKEN_PATH.exists():
                             creds = Credentials.from_authorized_user_file(str(TOKEN_PATH), SCOPES)
                         else:
@@ -416,7 +418,6 @@ class YouTubeUploader:
                 "categoryId": category_id,
                 "defaultLanguage": "en",
                 "defaultAudioLanguage": "en",
-                "channelId": channel_id,
             },
             "status": {
                 "privacyStatus": privacy_status,
@@ -437,11 +438,12 @@ class YouTubeUploader:
             while response is None:
                 status, response = request.next_chunk()
                 if status:
-                    logger.info("Upload progress: %d%%", int(status.progress() * 100))
+                    pct = int(status.progress() * 100)
+                    logger.info("Upload progress: {}%", pct)
 
             video_id = response["id"]
-            video_url = f"https://www.youtube.com/watch?v={video_id}"
-            logger.info("Uploaded to channel %s: %s", channel_id, video_url)
+            video_url = "https://www.youtube.com/watch?v={}".format(video_id)
+            logger.info("Uploaded: {}", video_url)
 
             return {
                 "video_id": video_id,
