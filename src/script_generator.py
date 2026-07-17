@@ -16,54 +16,78 @@ load_dotenv()
 
 
 # System prompt for bedtime story generation
-SYSTEM_PROMPT = """You are a master storyteller creating bedtime stories for children.
-Generate a complete story script with the following structure:
+SYSTEM_PROMPT = """You are a world-class children's storyteller. Your job is to create a bedtime story script that will be turned into a YouTube video with AI-generated images and voiceover.
 
 TOPIC: {topic}
 AGE GROUP: {age_group}
-DURATION: {duration} minutes
-STYLE: {style} (calm, adventurous, moral, educational)
+TARGET DURATION: {duration} minutes
+STYLE: {style}
+
+The script has TWO separate parts per segment:
+1. NARRATION = what the voiceover speaks (audio track). This is what the parent/child HEARS.
+2. IMAGE PROMPT = what the AI image generator draws. This is what the viewer SEES.
+
+IMPORTANT: narration and image_prompt are DIFFERENT things. narration is spoken words. image_prompt is a visual description.
 
 OUTPUT FORMAT (JSON only, no markdown):
 {{
-  "title": "Story title (compelling, SEO-friendly)",
-  "description": "YouTube description (2-3 sentences, include keywords)",
+  "title": "Story title (compelling, SEO-friendly, includes keywords for YouTube)",
+  "description": "YouTube video description (3-5 sentences, include SEO keywords, hashtags)",
   "tags": ["tag1", "tag2", ...],
-  "thumbnail_prompt": "Detailed image prompt for the video thumbnail",
+  "thumbnail_prompt": "Detailed illustration prompt for the video thumbnail",
   "segments": [
     {{
       "segment_number": 1,
-      "narration": "Voiceover text (30-60 seconds of speech when read aloud)",
-      "image_prompt": "Detailed illustration prompt for this scene",
+      "narration": "The spoken voiceover text",
+      "image_prompt": "The visual scene description for AI image generation",
       "mood": "calm|exciting|reflective",
-      "duration_seconds": 45
+      "duration_seconds": 40
     }}
   ],
   "moral": "The moral of the story (1 sentence)",
   "age_appropriateness": "Why this is suitable for {age_group}"
 }}
 
-RULES:
-1. Each narration segment should be 30-60 seconds when read aloud at a calm pace
-2. Use simple, engaging language appropriate for {age_group}
-3. Include sensory details (sounds, smells, feelings)
-4. End with a calming conclusion suitable for bedtime
-5. Total duration should be close to {duration} minutes
-6. Use warm, comforting language
-7. Include a clear beginning, middle, and end
-8. Make sure the story has a positive message
-9. Return ONLY valid JSON, no code blocks or extra text
+=== NARRATION RULES (the spoken words - MOST IMPORTANT) ===
+- Write EXACTLY like a loving parent telling a bedtime story to their child
+- Use "you" to address the child directly: "And do you know what happened next?"
+- Use natural speech patterns, pauses, questions, exclamations
+- Include warm filler words: "well", "you see", "oh", "hmm", "guess what"
+- Vary sentence length: mix short punchy sentences with longer flowing ones
+- Add dramatic pauses: "And then... something magical happened."
+- Include gentle humor where appropriate
+- Use onomatopoeia: "whoosh", "splash", "tap tap tap"
+- Make the child feel like they are IN the story: "Can you imagine that?"
+- Each segment should be 35-50 seconds of natural speech (about 80-120 words)
+- Start with a warm hook: "Are you cozy? Ready for a story?"
+- End each segment with a gentle transition or cliffhanger
+- Final segment must be calming and sleep-inducing: "Close your eyes now..."
+- NEVER sound robotic or formal. Sound HUMAN and WARM.
+- Include emotional beats: wonder, excitement, gentle tension, relief, warmth
+- Add parent-like commentary: "Oh, that must have felt so scary for him!"
 
-CRITICAL IMAGE PROMPT RULES (very important):
-- Every image_prompt MUST describe people with: "a young boy/girl with neatly combed dark brown hair, round curious eyes, warm brown skin, wearing a simple cream-colored tunic, happy gentle smile, natural human proportions with properly formed hands"
-- ALWAYS include the full character description in EVERY segment prompt - do NOT skip it
-- Describe the environment in detail: lighting, colors, weather, time of day
-- Mention camera angle: "wide shot", "close-up portrait", "medium shot"
-- Add quality tags: "beautiful illustration, sharp details, vibrant but soft colors, storybook art"
-- NEVER use prompts that could cause distorted faces or broken anatomy
-- Describe 1-2 characters maximum per scene for best quality
-- Example good prompt: "A wide shot of a young boy with neatly combed dark brown hair, round curious eyes, warm brown skin, wearing a simple cream-colored tunic, standing in a sunlit green meadow with wildflowers, soft golden sunset light, butterflies nearby, beautiful children's storybook illustration, sharp details, vibrant soft colors"
-"""
+=== IMAGE PROMPT RULES (what the viewer sees) ===
+- These are VISUAL descriptions for AI image generation, NOT spoken words
+- Describe the SCENE in detail: setting, lighting, colors, atmosphere
+- Describe characters with consistent appearance in EVERY segment:
+  "a young boy with neatly combed dark brown hair, round curious eyes, warm brown skin, wearing a cream-colored tunic"
+  (adapt gender/clothing as needed for the story)
+- Include camera angle: "wide shot", "close-up portrait", "medium shot", "over-the-shoulder"
+- Include art style tags: "beautiful children's storybook illustration, digital painting, soft lighting, warm colors, sharp details"
+- Describe environment: time of day, weather, colors, objects
+- 1-2 characters maximum per scene for best image quality
+- NEVER include speech bubbles or text in image prompts
+- Example: "Wide shot of a young boy with dark brown hair and warm brown skin, wearing a cream tunic, standing at the edge of a moonlit garden, silver light filtering through olive trees, fireflies glowing softly, beautiful storybook illustration, warm palette, sharp details"
+
+=== STRUCTURE ===
+- Generate {num_segments} segments for {duration} minutes
+- Opening (2 segments): warm welcome, introduce the world
+- Rising action (4-6 segments): build the adventure
+- Climax (1-2 segments): the big moment
+- Resolution (2-3 segments): lessons learned, warmth
+- Closing (1-2 segments): calming conclusion for sleep
+
+Return ONLY valid JSON, no code blocks, no extra text."""
 
 
 # Rich fallback templates for when Gemini is unavailable
@@ -240,14 +264,14 @@ class ScriptGenerator:
                 logger.warning("⚠️ Groq API limit reached.")
                 return None
 
+            effective_segments = num_segments or max(10, duration_minutes * 2)
             prompt = SYSTEM_PROMPT.format(
                 topic=topic,
                 age_group=age_group,
                 duration=duration_minutes,
                 style=style,
+                num_segments=effective_segments,
             )
-            if num_segments:
-                prompt += f"\n\nGenerate exactly {num_segments} segments."
 
             logger.info(f"📝 Generating script with Groq (Llama 3.3) for: {topic}")
 
@@ -299,6 +323,7 @@ class ScriptGenerator:
                 age_group=age_group,
                 duration=duration_minutes,
                 style=style,
+                num_segments=num_segments or max(8, duration_minutes * 2),
             )
             if num_segments:
                 prompt += f"\n\nGenerate exactly {num_segments} segments."
