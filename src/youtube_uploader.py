@@ -341,39 +341,41 @@ class YouTubeUploader:
             return None
 
     def list_all_channels(self) -> list:
-        """List all channels the user can manage (personal + brand accounts)."""
+        """List all channels the user owns - personal + brand accounts."""
         if not self._authenticated:
             if not self.authenticate():
                 return []
 
+        channels = []
+
+        # Method 1: mine=True returns personal channel
         try:
-            # mine=True returns the personal channel
             response = self.youtube.channels().list(
-                part="id,snippet,statistics,contentDetails",
+                part="id,snippet,statistics",
                 mine=True,
             ).execute()
+            channels.extend(response.get("items", []))
+        except Exception:
+            pass
 
-            channels = response.get("items", [])
+        # Method 2: Search for known brand account handles
+        known_handles = ["@DreamlandNarrations", "@mzubairhassan18"]
+        existing_ids = {ch["id"] for ch in channels}
 
-            # Also try managedByMe for brand accounts
+        for handle in known_handles:
             try:
-                resp2 = self.youtube.channels().list(
-                    part="id,snippet,statistics,contentDetails",
-                    managedByMe=True,
-                    maxResults=50,
+                resp = self.youtube.channels().list(
+                    part="id,snippet,statistics",
+                    forHandle=handle,
                 ).execute()
-                existing_ids = {c["id"] for c in channels}
-                for ch in resp2.get("items", []):
+                for ch in resp.get("items", []):
                     if ch["id"] not in existing_ids:
                         channels.append(ch)
+                        existing_ids.add(ch["id"])
             except Exception:
                 pass
 
-            return channels
-
-        except HttpError as e:
-            logger.error("Failed to list channels: %s", e)
-            return []
+        return channels
 
     def find_channel_by_handle(self, handle: str) -> Optional[str]:
         """Find a channel ID by @handle."""
