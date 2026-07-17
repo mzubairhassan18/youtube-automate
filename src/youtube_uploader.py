@@ -339,3 +339,119 @@ class YouTubeUploader:
         except HttpError as e:
             logger.error("Failed to get channel info: %s", e)
             return None
+
+    def list_all_channels(self) -> list:
+        """List all channels the user can manage (personal + brand accounts)."""
+        if not self._authenticated:
+            if not self.authenticate():
+                return []
+
+        try:
+            # mine=True returns the personal channel
+            response = self.youtube.channels().list(
+                part="id,snippet,statistics,contentDetails",
+                mine=True,
+            ).execute()
+
+            channels = response.get("items", [])
+
+            # Also try managedByMe for brand accounts
+            try:
+                resp2 = self.youtube.channels().list(
+                    part="id,snippet,statistics,contentDetails",
+                    managedByMe=True,
+                    maxResults=50,
+                ).execute()
+                existing_ids = {c["id"] for c in channels}
+                for ch in resp2.get("items", []):
+                    if ch["id"] not in existing_ids:
+                        channels.append(ch)
+            except Exception:
+                pass
+
+            return channels
+
+        except HttpError as e:
+            logger.error("Failed to list channels: %s", e)
+            return []
+
+    def find_channel_by_handle(self, handle: str) -> Optional[str]:
+        """Find a channel ID by @handle."""
+        channels = self.list_all_channels()
+        for ch in channels:
+            title = ch.get("snippet", {}).get("title", "")
+            # Check title match
+            if handle.lower().strip("@") in title.lower().strip("@"):
+                return ch["id"]
+            # Check via API search
+        return None
+
+    def upload_to_channel(
+        self,
+        channel_id: str,
+        video_path: str,
+        title: str,
+        description: str = "",
+        tags: Optional[List[str]] = None,
+        category_id: str = CATEGORY_ID,
+        privacy_status: str = "private",
+        made_for_kids: bool = True,
+    ) -> Optional[Dict[str, Any]]:
+        """Upload video to a specific channel using the channel's content owner."""
+        if not self._authenticated:
+            if not self.authenticate():
+                return None
+
+        # Try upload with channelId in snippet
+        if tags is None:
+            tags = DEFAULT_TAGS
+
+        body = {
+            "snippet": {
+                "title": title[:100],
+                "description": description[:5000],
+                "tags": tags[:30],
+                "categoryId": category_id,
+                "defaultLanguage": "en",
+                "defaultAudioLanguage": "en",
+                "channelId": channel_id,
+            },
+            "status": {
+                "privacyStatus": privacy_status,
+                "selfDeclaredMadeForKids": made_for_kids,
+                "embeddable": True,
+                "publicStatsViewable": True,
+            },
+        }
+
+        file_size = os.path.getsize(video_path)
+        logger.info("Uploading to channel %s: '%s' (%.1f MB)", channel_id, Path(video_path).name, file_size / 1024 / 1024)
+
+        try:
+            media = MediaFileUpload(video_path, mimetype="video/mp4", resumable=True, chunksize=10 * 1024 * 1024)
+            request = self.youtube.videos().insert(part="snippet,status", body=body, media_body=media)
+
+            response = None
+            while response is None:
+                status, response = request.next_chunk()
+                if status:
+                    logger.info("Upload progress: %d%%", int(status.progress() * 100))
+
+            video_id = response["id"]
+            video_url = f"https://www.youtube.com/watch?v={video_id}"
+            logger.info("Uploaded to channel %s: %s", channel_id, video_url)
+
+            return {
+                "video_id": video_id,
+                "url": video_url,
+                "title": title,
+                "privacy": privacy_status,
+                "channel_id": channel_id,
+            }
+
+        except HttpError as e:
+            logger.error("Upload failed: %s", e)
+            return None
+        except Exception as e:
+            logger.error("Upload error: %s", e)
+            return None

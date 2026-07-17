@@ -681,11 +681,10 @@ def render_youtube_test_tab():
     st.header("YouTube Upload Test")
     st.caption("Test upload any video file to Dreamland Narrations")
 
-    # Check auth status
     from src.youtube_uploader import YouTubeUploader, TOKEN_PATH
 
     if not TOKEN_PATH.exists():
-        st.warning("Not authenticated yet. Run `python auth_youtube.py` from terminal first, or click below.")
+        st.warning("Not authenticated yet.")
         if st.button("Authenticate with YouTube", type="primary", key="yt_auth_btn"):
             u = YouTubeUploader()
             if u.authenticate():
@@ -697,24 +696,42 @@ def render_youtube_test_tab():
 
     st.success("YouTube authenticated")
 
-    # Show channel info
     u = YouTubeUploader()
-    if u.authenticate():
-        try:
-            resp = u.youtube.channels().list(part="snippet,statistics", mine=True).execute()
-            if resp["items"]:
-                ch = resp["items"][0]
-                st.info(f"Channel: **{ch['snippet']['title']}** | Subscribers: {ch['statistics'].get('subscriberCount', '0')} | Videos: {ch['statistics'].get('videoCount', '0')}")
-        except Exception:
-            st.info("Channel: Dreamland Narrations (@DreamlandNarrations)")
+    if not u.authenticate():
+        st.error("Auth failed")
+        return
+
+    # List all channels
+    channels = u.list_all_channels()
+    if channels:
+        st.subheader("Available Channels")
+        for i, ch in enumerate(channels):
+            ch_id = ch["id"]
+            ch_title = ch["snippet"]["title"]
+            ch_subs = ch.get("statistics", {}).get("subscriberCount", "0")
+            is_dreamland = "dreamland" in ch_title.lower()
+            badge = " TARGET" if is_dreamland else ""
+            st.write(f"{i+1}. **{ch_title}** (ID: `{ch_id}`, Subs: {ch_subs}){badge}")
+
+        # Channel selector
+        channel_options = {ch["snippet"]["title"]: ch["id"] for ch in channels}
+        selected_name = st.selectbox(
+            "Upload to channel",
+            list(channel_options.keys()),
+            index=0,
+            key="yt_channel_select",
+        )
+        selected_channel_id = channel_options[selected_name]
+        st.caption(f"Channel ID: `{selected_channel_id}`")
+    else:
+        st.warning("No channels found")
+        return
 
     st.divider()
 
     # Video file selector
     video_dir = Path("./output/full_videos")
     video_files = list(video_dir.glob("*.mp4")) if video_dir.exists() else []
-
-    # Also check output root for any mp4
     root_videos = list(Path("./output").glob("*.mp4"))
     all_videos = video_files + root_videos
 
@@ -723,16 +740,17 @@ def render_youtube_test_tab():
     with col1:
         if all_videos:
             selected = st.selectbox(
-                "Select video to upload",
+                "Select video",
                 all_videos,
                 format_func=lambda x: f"{x.name} ({x.stat().st_size // 1024 // 1024}MB)",
                 key="test_vid_select",
             )
         else:
             st.info("No videos found in output/")
-            uploaded = st.file_uploader("Or upload a video file", type=["mp4", "mkv", "avi", "webm"], key="test_vid_upload")
+            uploaded = st.file_uploader("Upload video", type=["mp4", "mkv", "avi", "webm"], key="test_vid_upload")
             if uploaded:
                 save_path = video_dir / uploaded.name
+                video_dir.mkdir(parents=True, exist_ok=True)
                 with open(save_path, "wb") as f:
                     f.write(uploaded.read())
                 st.success(f"Saved: {save_path}")
@@ -742,10 +760,6 @@ def render_youtube_test_tab():
     with col2:
         privacy = st.selectbox("Privacy", ["private", "unlisted", "public"], key="test_privacy")
 
-    if selected or (not all_videos and 'test_vid_upload' not in st.session_state):
-        pass
-
-    # Metadata
     st.subheader("Metadata")
     title = st.text_input("Title", value="Bedtime Story for Kids - Dreamland Narrations", key="test_title")
     description = st.text_area("Description", value="A magical bedtime story for kids. Subscribe to Dreamland Narrations for more!\n\n#bedtimestory #kidsstory #dreamlandnarrations", height=120, key="test_desc")
@@ -759,9 +773,9 @@ def render_youtube_test_tab():
             st.error("Select or upload a video first")
             return
 
-        with st.spinner("Uploading..."):
-            u = YouTubeUploader()
-            result = u.upload_video(
+        with st.spinner(f"Uploading to {selected_name}..."):
+            result = u.upload_to_channel(
+                channel_id=selected_channel_id,
                 video_path=video_path,
                 title=title,
                 description=description,
@@ -773,7 +787,7 @@ def render_youtube_test_tab():
             if result:
                 st.success("Uploaded!")
                 st.markdown(f"**[{result['title']}]({result['url']})**")
-                st.caption(f"Video ID: {result['video_id']}")
+                st.caption(f"Video ID: {result['video_id']} | Channel: {selected_name}")
             else:
                 st.error("Upload failed. Check logs.")
 
