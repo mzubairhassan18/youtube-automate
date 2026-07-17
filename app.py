@@ -192,12 +192,18 @@ def render_step_configure():
         key="topic_input",
     )
 
+    age_options = ["toddler", "preschool", "school_age", "preteen", "all_ages"]
+    queue_age = st.session_state.get("queue_age_group", "all_ages")
+    age_idx = age_options.index(queue_age) if queue_age in age_options else 4
+
+    queue_dur = st.session_state.get("queue_duration", 5)
+
     col1, col2, col3 = st.columns(3)
     with col1:
         age_group = st.selectbox(
             "Age Group",
-            ["toddler", "preschool", "school_age", "preteen", "all_ages"],
-            index=4,
+            age_options,
+            index=age_idx,
             format_func=lambda x: {
                 "toddler": "Toddler (1-3 yrs)",
                 "preschool": "Preschool (3-5 yrs)",
@@ -208,7 +214,7 @@ def render_step_configure():
             key="age_group",
         )
     with col2:
-        duration = st.slider("Duration (min)", 3, 15, 5, key="duration")
+        duration = st.slider("Duration (min)", 3, 15, queue_dur, key="duration")
     with col3:
         create_shorts = st.checkbox("Create Shorts", value=True, key="create_shorts")
 
@@ -224,6 +230,9 @@ def render_step_configure():
     if not topic:
         st.info("Enter a topic to begin")
         return
+
+    st.session_state.pop("queue_duration", None)
+    st.session_state.pop("queue_age_group", None)
 
     if st.button("Start", type="primary", key="start_btn"):
         st.session_state["running"] = True
@@ -480,8 +489,8 @@ def render_topics_tab():
             with c3:
                 if st.button("Generate", key="gen_%d" % t["id"], disabled=(status == "done")):
                     st.session_state["topic_from_queue"] = t["title"]
-                    st.session_state["duration"] = t.get("duration_minutes", 5)
-                    st.session_state["age_group"] = (t.get("age_groups") or ["all_ages"])[0]
+                    st.session_state["queue_duration"] = t.get("duration_minutes", 5)
+                    st.session_state["queue_age_group"] = (t.get("age_groups") or ["all_ages"])[0]
                     st.session_state["mode"] = "Auto"
                     st.session_state["current_step"] = 0
                     st.session_state["running"] = False
