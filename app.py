@@ -93,6 +93,10 @@ def sidebar():
 
 def run_auto_pipeline(topic, age_group, duration, create_shorts, custom_prompt=None):
     """Run all steps automatically with progress tracking."""
+    st.session_state.pop("topic_from_queue", None)
+    st.session_state.pop("queue_duration", None)
+    st.session_state.pop("queue_age_group", None)
+
     progress_bar = st.progress(0)
     status_text = st.empty()
     log_area = st.empty()
@@ -493,8 +497,8 @@ def render_topics_tab():
                     st.session_state["queue_age_group"] = (t.get("age_groups") or ["all_ages"])[0]
                     st.session_state["mode"] = "Auto"
                     st.session_state["current_step"] = 0
-                    st.session_state["running"] = False
-                    st.success(f"Topic loaded: **{t['title']}** — go to **Create Video** tab and click Start")
+                    st.session_state["running"] = True
+                    st.rerun()
 
     st.divider()
     st.subheader("Add Topic")
@@ -567,9 +571,9 @@ def main():
         step = st.session_state["current_step"]
 
         if mode == "Auto" and st.session_state.get("running"):
-            topic = st.session_state.get("topic_input", "")
-            age_group = st.session_state.get("age_group", "all_ages")
-            duration = st.session_state.get("duration", 5)
+            topic = st.session_state.get("topic_from_queue") or st.session_state.get("topic_input", "")
+            age_group = st.session_state.get("queue_age_group") or st.session_state.get("age_group", "all_ages")
+            duration = st.session_state.get("queue_duration") or st.session_state.get("duration", 5)
             create_shorts = st.session_state.get("create_shorts", True)
             run_auto_pipeline(topic, age_group, duration, create_shorts)
             return
