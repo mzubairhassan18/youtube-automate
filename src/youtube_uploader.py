@@ -19,8 +19,12 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 from googleapiclient.errors import HttpError
 
-# Scopes needed for YouTube upload
-SCOPES = ["https://www.googleapis.com/auth/youtube.upload"]
+# Scopes needed for YouTube operations
+SCOPES = [
+    "https://www.googleapis.com/auth/youtube.upload",
+    "https://www.googleapis.com/auth/youtube",
+    "https://www.googleapis.com/auth/youtube.force-ssl",
+]
 
 # Paths
 CONFIG_DIR = Path(__file__).parent.parent / "config"
@@ -87,7 +91,18 @@ class YouTubeUploader:
                     flow = InstalledAppFlow.from_client_secrets_file(
                         str(CLIENT_SECRET_PATH), SCOPES
                     )
-                    creds = flow.run_local_server(port=0)
+                    # Use run_local_server with open_browser=True
+                    # Suppress Windows socket cleanup errors
+                    try:
+                        creds = flow.run_local_server(port=0, open_browser=True)
+                    except OSError:
+                        # Windows socket cleanup error - OAuth likely succeeded
+                        # Check if token was saved
+                        if TOKEN_PATH.exists():
+                            creds = Credentials.from_authorized_user_file(str(TOKEN_PATH), SCOPES)
+                        else:
+                            logger.error("OAuth failed - no token saved")
+                            return False
 
                 # Save token for next time
                 with open(TOKEN_PATH, "w") as f:

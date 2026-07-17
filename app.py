@@ -182,31 +182,37 @@ def run_auto_pipeline(topic, age_group, duration, create_shorts, custom_prompt=N
     st.session_state["completed_steps"].append(4)
     progress_bar.progress(85, text="Step 4/6: Video assembled!")
 
-    # Step 5: YouTube Upload
-    log("Uploading to YouTube...")
-    progress_bar.progress(87, text="Step 5/6: Uploading to YouTube...")
+    # Step 5: YouTube Upload (conditional)
+    auto_upload = st.session_state.get("auto_upload_yt", False)
 
-    uploader = YouTubeUploader()
-    metadata = uploader.build_metadata_from_script(
-        script, privacy=st.session_state.get("upload_privacy", "private")
-    )
+    if auto_upload:
+        log("Uploading to YouTube...")
+        progress_bar.progress(87, text="Step 5/6: Uploading to YouTube...")
 
-    yt_result = uploader.upload_video(
-        video_path=video_path,
-        title=metadata["title"],
-        description=metadata["description"],
-        tags=metadata["tags"],
-        privacy_status=metadata["privacy_status"],
-        made_for_kids=metadata["made_for_kids"],
-    )
+        uploader = YouTubeUploader()
+        metadata = uploader.build_metadata_from_script(
+            script, privacy=st.session_state.get("upload_privacy", "private")
+        )
 
-    if yt_result:
-        st.session_state["youtube_result"] = yt_result
-        st.session_state["completed_steps"].append(5)
-        progress_bar.progress(98, text="Step 5/6: Uploaded to YouTube!")
-        log(f"Uploaded: {yt_result['url']}")
+        yt_result = uploader.upload_video(
+            video_path=video_path,
+            title=metadata["title"],
+            description=metadata["description"],
+            tags=metadata["tags"],
+            privacy_status=metadata["privacy_status"],
+            made_for_kids=metadata["made_for_kids"],
+        )
+
+        if yt_result:
+            st.session_state["youtube_result"] = yt_result
+            st.session_state["completed_steps"].append(5)
+            progress_bar.progress(98, text="Step 5/6: Uploaded to YouTube!")
+            log(f"Uploaded: {yt_result['url']}")
+        else:
+            log("YouTube upload skipped (auth or quota issue)")
     else:
-        log("YouTube upload skipped (auth or quota issue)")
+        st.session_state["completed_steps"].append(5)
+        progress_bar.progress(95, text="Step 5/6: YouTube upload skipped (manual mode)")
 
     # Step 6: Done
     st.session_state["completed_steps"].append(6)
@@ -252,7 +258,11 @@ def render_step_configure():
     with col2:
         duration = st.slider("Duration (min)", 3, 15, queue_dur, key="duration")
     with col3:
-        create_shorts = st.checkbox("Create Shorts", value=True, key="create_shorts")
+        c3a, c3b = st.columns(2)
+        with c3a:
+            create_shorts = st.checkbox("Create Shorts", value=True, key="create_shorts")
+        with c3b:
+            upload_yt = st.checkbox("Auto Upload to YouTube", value=False, key="auto_upload_yt")
 
     mode = st.radio(
         "Mode",
@@ -274,6 +284,13 @@ def render_step_configure():
         st.session_state["running"] = True
         st.session_state["topic_from_queue"] = None
         st.rerun()
+
+    # Show final video preview after pipeline completes
+    video_path = st.session_state.get("video_path")
+    if video_path and os.path.exists(video_path) and st.session_state.get("current_step", 0) >= 4:
+        st.divider()
+        st.subheader("Video Preview")
+        st.video(video_path)
 
 
 def render_step_script():
