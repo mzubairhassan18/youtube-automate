@@ -125,6 +125,7 @@ def run_auto_pipeline(topic, age_group, duration, create_shorts, custom_prompt=N
     st.session_state["completed_steps"].append(1)
     progress_bar.progress(15, text="Step 1/6: Script generated!")
     log(f"Script ready: {len(script.get('segments', []))} segments")
+    time.sleep(0.3)
 
     # Step 2: Images
     log("Generating images...")
@@ -137,6 +138,7 @@ def run_auto_pipeline(topic, age_group, duration, create_shorts, custom_prompt=N
     st.session_state["completed_steps"].append(2)
     progress_bar.progress(50, text="Step 2/6: Images generated!")
     log(f"Generated {len(paths)} images")
+    time.sleep(0.3)
 
     # Step 3: Voiceover
     log("Generating voiceover...")
@@ -148,6 +150,7 @@ def run_auto_pipeline(topic, age_group, duration, create_shorts, custom_prompt=N
     st.session_state["completed_steps"].append(3)
     progress_bar.progress(70, text="Step 3/6: Voiceover generated!")
     log(f"Generated {len(audio_paths)} audio segments")
+    time.sleep(0.3)
 
     # Step 4: Video Assembly
     log("Assembling video...")
@@ -181,6 +184,7 @@ def run_auto_pipeline(topic, age_group, duration, create_shorts, custom_prompt=N
     usage.record_video_created(len(short_paths))
     st.session_state["completed_steps"].append(4)
     progress_bar.progress(85, text="Step 4/6: Video assembled!")
+    time.sleep(0.3)
 
     # Step 5: YouTube Upload (conditional)
     auto_upload = st.session_state.get("auto_upload_yt", False)
@@ -212,8 +216,8 @@ def run_auto_pipeline(topic, age_group, duration, create_shorts, custom_prompt=N
             else:
                 log("YouTube upload skipped (auth or quota issue)")
 
-    # Mark steps done
-    st.session_state["completed_steps"] = [1, 2, 3, 4, 5, 6]
+    st.session_state["completed_steps"].append(5)
+    st.session_state["completed_steps"].append(6)
     st.session_state["current_step"] = 6
     st.session_state["running"] = False
     progress_bar.progress(100, text="Complete!")
