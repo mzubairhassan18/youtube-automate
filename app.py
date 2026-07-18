@@ -186,7 +186,6 @@ def run_auto_pipeline(topic, age_group, duration, create_shorts, custom_prompt=N
     auto_upload = st.session_state.get("auto_upload_yt", False)
 
     if auto_upload:
-        # Guard against duplicate upload
         if st.session_state.get("youtube_result"):
             log("Already uploaded to YouTube")
         else:
@@ -194,35 +193,30 @@ def run_auto_pipeline(topic, age_group, duration, create_shorts, custom_prompt=N
             progress_bar.progress(87, text="Step 5/6: Uploading to YouTube...")
 
             uploader = YouTubeUploader()
-        metadata = uploader.build_metadata_from_script(
-            script, privacy=st.session_state.get("upload_privacy", "private")
-        )
+            metadata = uploader.build_metadata_from_script(
+                script, privacy=st.session_state.get("upload_privacy", "private")
+            )
 
-        yt_result = uploader.upload_video(
-            video_path=video_path,
-            title=metadata["title"],
-            description=metadata["description"],
-            tags=metadata["tags"],
-            privacy_status=metadata["privacy_status"],
-            made_for_kids=metadata["made_for_kids"],
-        )
+            yt_result = uploader.upload_video(
+                video_path=video_path,
+                title=metadata["title"],
+                description=metadata["description"],
+                tags=metadata["tags"],
+                privacy_status=metadata["privacy_status"],
+                made_for_kids=metadata["made_for_kids"],
+            )
 
-        if yt_result:
-            st.session_state["youtube_result"] = yt_result
-            st.session_state["completed_steps"].append(5)
-            progress_bar.progress(98, text="Step 5/6: Uploaded to YouTube!")
-            log(f"Uploaded: {yt_result['url']}")
-        else:
-            log("YouTube upload skipped (auth or quota issue)")
-    else:
-        st.session_state["completed_steps"].append(5)
-        progress_bar.progress(95, text="Step 5/6: YouTube upload skipped (manual mode)")
+            if yt_result:
+                st.session_state["youtube_result"] = yt_result
+                log(f"Uploaded: {yt_result['url']}")
+            else:
+                log("YouTube upload skipped (auth or quota issue)")
 
-    # Step 6: Done
-    st.session_state["completed_steps"].append(6)
-    progress_bar.progress(100, text="Complete!")
+    # Mark steps done
+    st.session_state["completed_steps"] = [1, 2, 3, 4, 5, 6]
     st.session_state["current_step"] = 6
     st.session_state["running"] = False
+    progress_bar.progress(100, text="Complete!")
     log("All done!")
     time.sleep(0.5)
 
@@ -512,40 +506,86 @@ def render_step_youtube():
         st.caption(f"Video ID: {youtube_result['video_id']}")
         if youtube_result.get("thumbnail_set"):
             st.info("Thumbnail set")
-    else:
-        if script:
+        c1, c2 = st.columns(2)
+        with c1:
+            if st.button("← Back", key="back_yt"):
+                st.session_state["current_step"] = 4
+                st.rerun()
+        with c2:
+            if st.button("Done", key="done_yt"):
+                st.session_state["current_step"] = 6
+                st.rerun()
+        return
+
+    from src.youtube_uploader import TOKEN_PATH
+
+    # Auth check
+    if not TOKEN_PATH.exists():
+        st.warning("YouTube not authenticated")
+        if st.button("Authenticate with YouTube", type="primary", key="yt_auth_step"):
             uploader = YouTubeUploader()
-            metadata = uploader.build_metadata_from_script(script, privacy="private")
+            if uploader.authenticate():
+                st.success("Authenticated!")
+                st.rerun()
+            else:
+                st.error("Auth failed")
+        if st.button("Skip YouTube Upload"):
+            st.session_state["current_step"] = 6
+            st.rerun()
+        return
 
-            with st.expander("Preview Metadata", expanded=True):
-                st.text_input("Title", value=metadata["title"], key="yt_title", disabled=True)
-                st.text_area("Description", value=metadata["description"], height=150, key="yt_desc", disabled=True)
-                st.text_area("Tags", value=", ".join(metadata["tags"]), key="yt_tags", disabled=True)
+    uploader = YouTubeUploader()
+    if not uploader.authenticate():
+        st.warning("Auth token invalid. Re-authenticate?")
+        if st.button("Re-authenticate"):
+            TOKEN_PATH.unlink(missing_ok=True)
+            st.rerun()
+        return
 
-            privacy = st.selectbox("Privacy", ["private", "unlisted", "public"], key="yt_privacy")
-            st.session_state["upload_privacy"] = privacy
+    # Show channels
+    channels = uploader.list_all_channels()
+    channel_options = {}
+    for ch in channels:
+        cn = ch["snippet"]["title"]
+        channel_options[cn] = ch["id"]
 
-            if st.button("Upload to YouTube", type="primary", key="yt_upload_btn"):
-                with st.spinner("Authenticating with YouTube..."):
-                    uploader = YouTubeUploader()
-                    metadata = uploader.build_metadata_from_script(script, privacy=privacy)
+    col1, col2 = st.columns(2)
+    with col1:
+        dreamland = [n for n in channel_options.keys() if "dreamland" in n.lower()]
+        dreamland_id = channel_options.get(dreamland[0]) if dreamland else None
+        personal_id = [v for k, v in channel_options.items() if "dreamland" not in k.lower()]
+        default_ch = dreamland[0] if dreamland else (list(channel_options.keys())[0] if channel_options else "@DreamlandNarrations")
+        selected_name = st.selectbox("Channel", list(channel_options.keys()) if channel_options else ["Dreamland Narrations"], index=0 if not dreamland else list(channel_options.keys()).index(dreamland[0]), key="manual_yt_channel")
+        selected_channel_id = channel_options[selected_name] if channel_options else "UCtjaFQ-9Shm1F_FduP-yuLg"
+    with col2:
+        privacy = st.selectbox("Privacy", ["private", "unlisted", "public"], key="yt_privacy")
+        st.session_state["upload_privacy"] = privacy
 
-                    with st.spinner("Uploading video..."):
-                        result = uploader.upload_video(
-                            video_path=video_path,
-                            title=metadata["title"],
-                            description=metadata["description"],
-                            tags=metadata["tags"],
-                            privacy_status=privacy,
-                            made_for_kids=True,
-                        )
+    if script:
+        meta = uploader.build_metadata_from_script(script, privacy=privacy)
+        with st.expander("Preview Metadata", expanded=True):
+            st.text_input("Title", value=meta["title"], key="yt_title", disabled=True)
+            st.text_area("Description", value=meta["description"], height=150, key="yt_desc", disabled=True)
+            st.text_area("Tags", value=", ".join(meta["tags"]), key="yt_tags", disabled=True)
 
-                        if result:
-                            st.session_state["youtube_result"] = result
-                            st.success("Uploaded!")
-                            st.rerun()
-                        else:
-                            st.error("Upload failed. Check logs.")
+    if st.button("Upload to YouTube", type="primary", key="yt_upload_btn"):
+        with st.spinner(f"Uploading to {selected_name}..."):
+            meta = uploader.build_metadata_from_script(script, privacy=privacy)
+            result = uploader.upload_video(
+                video_path=video_path,
+                title=meta["title"],
+                description=meta["description"],
+                tags=meta["tags"],
+                privacy_status=privacy,
+                made_for_kids=True,
+            )
+
+            if result:
+                st.session_state["youtube_result"] = result
+                st.success("Uploaded!")
+                st.rerun()
+            else:
+                st.error("Upload failed. Check logs.")
 
     c1, c2 = st.columns(2)
     with c1:
@@ -553,7 +593,7 @@ def render_step_youtube():
             st.session_state["current_step"] = 4
             st.rerun()
     with c2:
-        if st.button("Done", key="done_yt"):
+        if st.button("Skip YouTube Upload → Done"):
             st.session_state["current_step"] = 6
             st.rerun()
 
